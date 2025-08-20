@@ -1,13 +1,20 @@
 #include <ncurses.h>
+#include <stdbool.h>
+
+#define COLOR_RESET   "\x1b[0m"
+#define COLOR_OFFSET  "\033[92m"
 
 #define WIDTH 10
 #define HEIGHT 20
 
 int playground[HEIGHT][WIDTH] = {0};
+
+
 typedef struct {
     int shape[4][4];
     int x, y;
 } tetro;
+
 
 tetro current_piece = {
     .shape = {
@@ -19,6 +26,7 @@ tetro current_piece = {
     .x = 3,
     .y = 0
 };
+
 
 void init() {
     initscr();  
@@ -32,12 +40,25 @@ void init() {
 // The environment 
 void draw_playground() {
     for (int y = 0; y < HEIGHT; y++) {
+        mvprintw(y, 0, "<!");
         for (int x = 0; x < WIDTH; x++) {
-            mvprintw(y, x * 2, ".");
+            if (playground[y][x] == 1) {
+                mvprintw(y, 2 + x, "[]");
+            } else {
+                mvprintw(y, 2 + x, ".");
+            }
         }
+        mvprintw(y, 2 + WIDTH, "!>");
     }
-    refresh();
+
+    // Bottom
+    mvprintw(HEIGHT, 0, "<!");
+    for (int x = 0; x < WIDTH; x++) {
+        mvprintw(HEIGHT, 2 + x, "=");
+    }
+    mvprintw(HEIGHT, 2 + WIDTH, "!>");
 }
+
 
 //draws the current tetromino into the playground
 void draw_tetromino(tetro *t){
@@ -53,12 +74,38 @@ void draw_tetromino(tetro *t){
 }
 
 // falling update for tetromino
-void update_tetromino(tetro *current){
+void update_tetromino(tetro *t){
 
-    if(current->y > HEIGHT - 3){
-        return;
+    bool bottom_hit = false;
+
+    for(int y=0;y<4;++y){
+        for(int x=0;x<4;++x){
+            if(t->shape[y][x]){
+                if(t->y + y + 1 > HEIGHT) bottom_hit = true;
+            }
+        }
     }
-    current->y += 1;
+
+    if(bottom_hit){
+        ground_lock(t);
+        spawn_another(t);
+    } else {
+        t->y += 1;
+    }
+    
+}
+
+void spawn_another(tetro *t){
+    *t = (tetro){
+        .shape = {
+        {1, 1, 0, 0},
+        {0, 1, 1, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    .x = 3,
+    .y = 0
+    }; 
 }
 
 void handle_input(tetro *t, int ch){
@@ -81,6 +128,22 @@ void handle_input(tetro *t, int ch){
     }
 }
 
+// locks the tetromino once it collides
+void ground_lock(tetro *t){
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if(t->shape[y][x]){
+                int locky = t->y + y;
+                int lockx = t->x + x;
+
+                if(locky >= 0 && locky <= HEIGHT-3 && lockx >=0 && lockx <= WIDTH)
+                    playground[locky][lockx] = 1;
+            }
+        }
+    }
+}
+
+
 int main(){
 
     init();
@@ -89,7 +152,9 @@ int main(){
         clear();
 
         draw_playground();
+        printf(COLOR_OFFSET);
         draw_tetromino(&current_piece);
+        printf(COLOR_RESET);
         refresh();
 
 
