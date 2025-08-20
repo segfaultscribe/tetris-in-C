@@ -76,17 +76,19 @@ void draw_tetromino(tetro *t){
 // falling update for tetromino
 void update_tetromino(tetro *t){
 
-    bool bottom_hit = false;
+    bool collison = false;
 
     for(int y=0;y<4;++y){
         for(int x=0;x<4;++x){
             if(t->shape[y][x]){
-                if(t->y + y + 1 >= HEIGHT) bottom_hit = true;
+                int nexty = t->y + y + 1;
+                int nextx = t->x + x;
+                if(nexty >= HEIGHT || playground[nexty][nextx]) collision = true;
             }
         }
     }
 
-    if(bottom_hit){
+    if(collision){
         ground_lock(t);
         spawn_another(t);
     } else {
