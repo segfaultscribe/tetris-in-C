@@ -9,12 +9,10 @@
 
 int playground[HEIGHT][WIDTH] = {0};
 
-
 typedef struct {
     int shape[4][4];
     int x, y;
 } tetro;
-
 
 tetro current_piece = {
     .shape = {
@@ -27,7 +25,7 @@ tetro current_piece = {
     .y = 0
 };
 
-
+//initialize ncurses
 void init() {
     initscr();  
     noecho();
@@ -39,26 +37,23 @@ void init() {
 
 // The environment 
 void draw_playground() {
+
     for (int y = 0; y < HEIGHT; y++) {
-        mvprintw(y, 0, "<!");
         for (int x = 0; x < WIDTH; x++) {
-            if (playground[y][x] == 1) {
-                mvprintw(y, 2 + x, "[]");
-            } else {
-                mvprintw(y, 2 + x, ".");
+            mvprintw(y, x * 2, " . ");
+        }
+    }
+
+    for(int y=0;y<HEIGHT;y++){
+        for(int x=0;x<WIDTH;++x){
+            if(playground[y][x]){
+                mvprintw(y, x * 2, "[]");
             }
         }
-        mvprintw(y, 2 + WIDTH, "!>");
     }
 
-    // Bottom
-    mvprintw(HEIGHT, 0, "<!");
-    for (int x = 0; x < WIDTH; x++) {
-        mvprintw(HEIGHT, 2 + x, "=");
-    }
-    mvprintw(HEIGHT, 2 + WIDTH, "!>");
+    refresh();
 }
-
 
 //draws the current tetromino into the playground
 void draw_tetromino(tetro *t){
@@ -76,7 +71,7 @@ void draw_tetromino(tetro *t){
 // falling update for tetromino
 void update_tetromino(tetro *t){
 
-    bool collison = false;
+    bool collision = false;
 
     for(int y=0;y<4;++y){
         for(int x=0;x<4;++x){
@@ -90,6 +85,7 @@ void update_tetromino(tetro *t){
 
     if(collision){
         ground_lock(t);
+        clear_full_rows();
         spawn_another(t);
     } else {
         t->y += 1;
@@ -97,6 +93,7 @@ void update_tetromino(tetro *t){
     
 }
 
+// new tetromino after the last one landed
 void spawn_another(tetro *t){
     *t = (tetro){
         .shape = {
@@ -110,6 +107,7 @@ void spawn_another(tetro *t){
     }; 
 }
 
+// keyboard controls
 void handle_input(tetro *t, int ch){
     if(t->y >= HEIGHT-3){
         return;
@@ -138,13 +136,42 @@ void ground_lock(tetro *t){
                 int locky = t->y + y;
                 int lockx = t->x + x;
 
-                if(locky >= 0 && locky <= HEIGHT-3 && lockx >=0 && lockx <= WIDTH)
+                if(locky >= 0 && locky < HEIGHT && lockx >=0 && lockx < WIDTH)
                     playground[locky][lockx] = 1;
             }
         }
     }
 }
 
+// clears the grid rows if they're full
+void clear_full_rows(){
+    for(int y=HEIGHT-1;y>=0;--y){
+        bool full = true;
+
+        for(int x=0;x<WIDTH;++x){
+            if(playground[y][x] == 0){
+                full = false;
+                break;
+            }
+        }
+
+        if(full){
+            for(int row = y; row > 0; --row){
+                for(int col = 0; col < WIDTH; ++col){
+                    playground[row][col] = playground[row -1][col]; 
+                }
+            }
+            
+            for(int col = 0; col < WIDTH; ++col){
+                playground[0][col] = 0;
+            }
+            
+            y++;
+        }
+
+        
+    }
+}
 
 int main(){
 
