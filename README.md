@@ -20,8 +20,6 @@ Welcome to **Tetoriz**, a minimalist, classic Tetris clone built from scratch in
 - Colored blocks
 - Game Over screen
 
----
-
 ## 🛠️ Build
 
 ```bash

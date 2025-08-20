@@ -3,7 +3,7 @@
 #define WIDTH 10
 #define HEIGHT 20
 
-
+int playground[HEIGHT][WIDTH] = {0};
 typedef struct {
     int shape[4][4];
     int x, y;
@@ -19,7 +19,6 @@ tetro current_piece = {
     .x = 3,
     .y = 0
 };
-
 
 void init() {
     initscr();  
@@ -66,7 +65,7 @@ void handle_input(tetro *t, int ch){
     if(t->y >= HEIGHT-3){
         return;
     }
-    
+
     switch(ch){
         case KEY_LEFT:
             if(t->x > 0) t->x -= 1;
@@ -81,7 +80,6 @@ void handle_input(tetro *t, int ch){
         break;
     }
 }
-
 
 int main(){
 
