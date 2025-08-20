@@ -81,7 +81,7 @@ void update_tetromino(tetro *t){
     for(int y=0;y<4;++y){
         for(int x=0;x<4;++x){
             if(t->shape[y][x]){
-                if(t->y + y + 1 > HEIGHT) bottom_hit = true;
+                if(t->y + y + 1 >= HEIGHT) bottom_hit = true;
             }
         }
     }
@@ -152,9 +152,8 @@ int main(){
         clear();
 
         draw_playground();
-        printf(COLOR_OFFSET);
         draw_tetromino(&current_piece);
-        printf(COLOR_RESET);
+        
         refresh();
 
 
