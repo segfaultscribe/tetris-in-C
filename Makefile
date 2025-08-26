@@ -1,2 +1,2 @@
 tetoriz: nctetris.c
-	$(CC) nctetris.c -lncurses -o tetoriz -Wall -Wextra -pedantic -std=c99
+	$(CC) nctetris.c -lncursesw -o tetoriz -Wall -Wextra -pedantic -std=c99
